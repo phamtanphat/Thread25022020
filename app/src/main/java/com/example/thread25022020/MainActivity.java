@@ -10,39 +10,49 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    int A,B,C;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Khoi tao ra luong
+
+//        Cach 2 : Dong bo thread theo object
+//        A sinh ra 1 so index
+//        B sinh ra 1 so index
+//        C ket qua a +b
+        A = B = C = 0;
         Thread threadA = new Thread(new Runnable() {
             @Override
             public void run() {
-                printFor("A");
+                for (int i = 1 ; i <= 10 ; i++){
+                    A = i;
+                    Log.d("BBB","A : " + i);
+                }
             }
         });
         Thread threadB = new Thread(new Runnable() {
             @Override
             public void run() {
-                printFor("B");
+                for (int i = 1 ; i <= 10 ; i++){
+                    B = i;
+                    Log.d("BBB","B : " + i);
+                }
             }
         });
         Thread threadC = new Thread(new Runnable() {
             @Override
             public void run() {
-                printFor("C");
+                for (int i = 1 ; i <= 10 ; i++){
+                    C = A + B;
+                    Log.d("BBB","C : " + C);
+                }
             }
         });
         threadA.start();
         threadB.start();
         threadC.start();
     }
-    // Cach 1 : Dong bo thread theo ham
-    // Note : deadlock : xay ra khi nhiu thread
-    // cung thuc thi 1 cong viec ma khong duoc dong bo
-    public void printFor(String name){
-        for (int i = 1 ; i <= 1000 ; i++){
-            Log.d("BBB",name + " running at position: " + i);
-        }
-    }
+
+
 }
