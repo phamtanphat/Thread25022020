@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -12,89 +14,43 @@ public class MainActivity extends AppCompatActivity {
 
     int A,B,C;
     MyFlag myFlag;
+    mHandler mHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Khoi tao ra luong
+        mHandler = new mHandler();
+        ThreadData threadData = new ThreadData();
+        threadData.start();
 
-//        Cach 2 : Dong bo thread theo object
-//        A sinh ra 1 so index
-//        B sinh ra 1 so index
-//        C ket qua a +b
-        A = B = C = 0;
-        myFlag = new MyFlag(0);
-        Thread threadA = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (myFlag){
-                    for (int i = 1 ; i <= 10 ; ){
-                        if (myFlag.position == 0){
-                            A = i;
-                            Log.d("BBB","A : " + i);
-                            myFlag.position = 1;
-                            i++;
-                            myFlag.notifyAll();
-                        }else{
-                            try {
-                                myFlag.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-
-            }
-        });
-        Thread threadB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (myFlag){
-                    for (int i = 1 ; i <= 10 ;){
-                        if (myFlag.position == 1){
-                            B = i;
-                            Log.d("BBB","B : " + i);
-                            myFlag.position = 2;
-                            i++;
-                            myFlag.notifyAll();
-                        }else{
-                            try {
-                                myFlag.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        Thread threadC = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (myFlag){
-                    for (int i = 1 ; i <= 10 ;){
-                        if (myFlag.position == 2){
-                            C = A + B;
-                            Log.d("BBB","C : " + C);
-                            myFlag.position = 0;
-                            i++;
-                            myFlag.notifyAll();
-                        }else{
-                            try {
-                                myFlag.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        threadA.start();
-        threadB.start();
-        threadC.start();
     }
 
-
+    class mHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case  0:
+                    Toast.makeText(MainActivity.this, "Hello Main", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
+                    Toast.makeText(MainActivity.this, msg.getData().get("obj").toString(), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+    class ThreadData extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            mHandler.sendEmptyMessage(0);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Message message = mHandler.obtainMessage(1,"Goodbye Main");
+                    mHandler.sendMessage(message);
+                }
+            },2000);
+        }
+    }
 }
