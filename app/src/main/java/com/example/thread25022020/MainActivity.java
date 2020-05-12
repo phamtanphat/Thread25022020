@@ -11,6 +11,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     int A,B,C;
+    MyFlag myFlag;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,30 +23,71 @@ public class MainActivity extends AppCompatActivity {
 //        B sinh ra 1 so index
 //        C ket qua a +b
         A = B = C = 0;
+        myFlag = new MyFlag(0);
         Thread threadA = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 1 ; i <= 10 ; i++){
-                    A = i;
-                    Log.d("BBB","A : " + i);
+                synchronized (myFlag){
+                    for (int i = 1 ; i <= 10 ; ){
+                        if (myFlag.position == 0){
+                            A = i;
+                            Log.d("BBB","A : " + i);
+                            myFlag.position = 1;
+                            i++;
+                            myFlag.notifyAll();
+                        }else{
+                            try {
+                                myFlag.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
+
             }
         });
         Thread threadB = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 1 ; i <= 10 ; i++){
-                    B = i;
-                    Log.d("BBB","B : " + i);
+                synchronized (myFlag){
+                    for (int i = 1 ; i <= 10 ;){
+                        if (myFlag.position == 1){
+                            B = i;
+                            Log.d("BBB","B : " + i);
+                            myFlag.position = 2;
+                            i++;
+                            myFlag.notifyAll();
+                        }else{
+                            try {
+                                myFlag.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
             }
         });
         Thread threadC = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 1 ; i <= 10 ; i++){
-                    C = A + B;
-                    Log.d("BBB","C : " + C);
+                synchronized (myFlag){
+                    for (int i = 1 ; i <= 10 ;){
+                        if (myFlag.position == 2){
+                            C = A + B;
+                            Log.d("BBB","C : " + C);
+                            myFlag.position = 0;
+                            i++;
+                            myFlag.notifyAll();
+                        }else{
+                            try {
+                                myFlag.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
             }
         });
